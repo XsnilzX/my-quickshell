@@ -58,6 +58,24 @@ PanelWindow {
     property var lastCpuIdle:  0
     property var lastCpuTotal: 0
 
+    /* ────────────── AUDIO DATA ────────────── */
+
+    property int sinkVolume: 0
+    property bool sinkMuted: false
+    property string sinkName: ""
+
+    property int sourceVolume: 0
+    property bool sourceMuted: false
+
+    // Audio-Icons basierend auf Gerät/Lautstärke
+    readonly property var audioIcons: ({
+        "headphone": "",
+        "headset": "",
+        "speaker": ["", "", ""],
+        "bluetooth": "",
+        "muted": ""
+    })
+
     /* ────────────── TIMER ────────────── */
 
     Timer {
@@ -71,6 +89,8 @@ PanelWindow {
             ramProc.running = true
             batProc.running = true
             brightProc.running = true
+            sinkProc.running = true
+            sourceProc.running = true
         }
     }
 
@@ -164,6 +184,56 @@ PanelWindow {
                 var p = parts.find(s => s.includes("%"))
                 if (p)
                     brightPercent = parseInt(p.replace("%", ""))
+            }
+        }
+    }
+
+    // 5. Audio Sink (Lautsprecher/Kopfhörer)
+    Process {
+        id: sinkProc
+        command: ["sh", "-c", `
+            vol=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null)
+            name=$(pactl get-default-sink 2>/dev/null)
+            echo "$vol|$name"
+        `]
+
+        stdout: SplitParser {
+            onRead: data => {
+                if (!data) return
+
+                var parts = data.trim().split("|")
+                var volPart = parts[0] || ""
+                var namePart = parts[1] || ""
+
+                // Volume parsen: "Volume: 0.75" oder "Volume: 0.75 [MUTED]"
+                var volMatch = volPart.match(/Volume:\s*([\d.]+)/)
+                if (volMatch) {
+                    sinkVolume = Math.round(parseFloat(volMatch[1]) * 100)
+                }
+
+                sinkMuted = volPart.includes("[MUTED]")
+                sinkName = namePart.toLowerCase()
+            }
+        }
+    }
+
+    // 6. Audio Source (Mikrofon)
+    Process {
+        id: sourceProc
+        command: ["sh", "-c", `
+            wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null
+        `]
+
+        stdout: SplitParser {
+            onRead: data => {
+                if (!data) return
+
+                var volMatch = data.match(/Volume:\s*([\d.]+)/)
+                if (volMatch) {
+                    sourceVolume = Math.round(parseFloat(volMatch[1]) * 100)
+                }
+
+                sourceMuted = data.includes("[MUTED]")
             }
         }
     }
@@ -329,6 +399,98 @@ PanelWindow {
                             pixelSize: root.fontSize
                             bold: true
                         }
+                    }
+
+                    /* ────────────── AUDIO WIDGET ────────────── */
+
+                    // Lautsprecher/Output
+                    Text {
+                        id: audioOutput
+
+                        function getIcon() {
+                            if (sinkMuted) return root.audioIcons.muted
+
+                            // Gerät erkennen
+                            if (sinkName.includes("bluetooth") || sinkName.includes("bluez"))
+                                return root.audioIcons.bluetooth
+                            if (sinkName.includes("headphone") || sinkName.includes("headset"))
+                                return root.audioIcons.headphone
+
+                            // Standard-Speaker Icons basierend auf Lautstärke
+                            var icons = root.audioIcons.speaker
+                            if (sinkVolume < 33) return icons[0]
+                            if (sinkVolume < 66) return icons[1]
+                            return icons[2]
+                        }
+
+                        text: getIcon() + " " + sinkVolume + "%"
+                        color: sinkMuted ? root.colMuted : root.colCyan
+
+                        font {
+                            family: root.fontFamily
+                            pixelSize: root.fontSize
+                            bold: true
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            anchors.margins: -4
+
+                            // Linksklick: pavucontrol öffnen
+                            onClicked: {
+                                pavuProc.running = true
+                            }
+
+                            // Scrollrad: Lautstärke ändern
+                            onWheel: wheel => {
+                                if (wheel.angleDelta.y > 0) {
+                                    volUpProc.running = true
+                                } else {
+                                    volDownProc.running = true
+                                }
+                            }
+                        }
+                    }
+
+                    // Trenner
+                    Text {
+                        text: "|"
+                        color: root.colMuted
+                        font {
+                            family: root.fontFamily
+                            pixelSize: root.fontSize
+                        }
+                    }
+
+                    // Mikrofon/Input
+                    Text {
+                        id: audioInput
+
+                        text: (sourceMuted ? "" : "") + " " + (sourceMuted ? "" : sourceVolume + "%")
+                        color: sourceMuted ? "#f7768e" : root.colGreen
+
+                        font {
+                            family: root.fontFamily
+                            pixelSize: root.fontSize
+                            bold: true
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            anchors.margins: -4
+
+                            // Klick: Mikrofon muten/unmuten
+                            onClicked: {
+                                micToggleProc.running = true
+                            }
+                        }
+                    }
+
+                    // Trenner zum Rest
+                    Rectangle {
+                        width: 1
+                        height: 16
+                        color: root.colMuted
                     }
                 }
             }
