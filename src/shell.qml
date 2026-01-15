@@ -16,8 +16,18 @@ PanelWindow {
         right: true
     }
 
+    // Margins für Abstand vom Bildschirmrand (optional)
+    /*margins {
+        top: 4
+        left: 8
+        right: 8
+    }*/
+
     implicitHeight: 36
     color: "transparent"
+    
+    // Wichtig: Exclusive Zone damit Fenster nicht unter die Bar gehen
+    exclusiveZone: implicitHeight + 8
 
     /* ────────────── THEME ────────────── */
 
@@ -33,6 +43,8 @@ PanelWindow {
 
     readonly property string fontFamily: "JetBrainsMono Nerd Font"
     readonly property int    fontSize:   13
+    readonly property int    inHeight:   34
+    readonly property int    inRadius:   6
 
     /* ────────────── STATUS DATA ────────────── */
 
@@ -93,7 +105,6 @@ PanelWindow {
     // 2. RAM
     Process {
         id: ramProc
-        // Hinweis: bei anderen Sprachen ggf. "Mem" statt "Speicher"
         command: [
             "sh",
             "-c",
@@ -150,7 +161,6 @@ PanelWindow {
                 if (parts.length === 0)
                     return
 
-                // suche den Eintrag mit "%"
                 var p = parts.find(s => s.includes("%"))
                 if (p)
                     brightPercent = parseInt(p.replace("%", ""))
@@ -160,13 +170,12 @@ PanelWindow {
 
     /* ────────────── UI KOMPONENTEN ────────────── */
 
-    // Generische Box mit Text, z.B. für die Uhr in der Mitte
     component BarItem: Rectangle {
         property alias text:      label.text
         property alias textColor: label.color
 
-        height: 26
-        radius: 6
+        height: inHeight
+        radius: inRadius
         color: root.colMuted
         width: label.implicitWidth + 24
 
@@ -183,20 +192,24 @@ PanelWindow {
 
     /* ────────────── LAYOUT ────────────── */
 
-    GridLayout {
+    RowLayout {
         anchors.fill: parent
-        anchors.margins: 8
-        columns: 3
+        anchors.leftMargin: 8
+        anchors.rightMargin: 8
+        spacing: 0
 
-        /* ────────────── LEFT: WORKSPACES ────────────── */
+    /* ────────────── LEFT: WORKSPACES ────────────── */
 
-        RowLayout {
-            Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
 
             Rectangle {
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
                 color: root.colMuted
-                radius: 6
-                height: 26
+                radius: inRadius
+                height: inHeight
                 width: wsRow.implicitWidth + 24
 
                 RowLayout {
@@ -239,26 +252,32 @@ PanelWindow {
             }
         }
 
-        /* ────────────── CENTER: UHR ────────────── */
+    /* ────────────── CENTER: UHR ────────────── */
 
-        RowLayout {
-            Layout.alignment: Qt.AlignCenter | Qt.AlignVCenter
+        Item {
+            Layout.preferredWidth: clockText.implicitWidth + 24
+            Layout.fillHeight: true
 
             BarItem {
+                id: clockText
+                anchors.centerIn: parent
                 text: Qt.formatTime(new Date(), "HH:mm")
                 textColor: root.colFg
             }
         }
 
-        /* ────────────── RIGHT: SYSTEM STATUS ────────────── */
+    /* ────────────── RIGHT: SYSTEM STATUS ────────────── */
 
-        RowLayout {
-            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
 
             Rectangle {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
                 color: root.colMuted
-                radius: 6
-                height: 26
+                radius: inRadius
+                height: inHeight
                 width: sysRow.implicitWidth + 24
 
                 RowLayout {
@@ -266,7 +285,6 @@ PanelWindow {
                     anchors.centerIn: parent
                     spacing: 16
 
-                    // 1. CPU
                     Text {
                         text: " " + cpuUsage + "%"
                         color: root.colYellow
@@ -277,7 +295,6 @@ PanelWindow {
                         }
                     }
 
-                    // 2. RAM
                     Text {
                         text: " " + ramUsage + "%"
                         color: root.colPurple
@@ -288,7 +305,6 @@ PanelWindow {
                         }
                     }
 
-                    // 3. Helligkeit
                     Text {
                         text: " " + brightPercent + "%"
                         color: root.colOrange
@@ -299,15 +315,14 @@ PanelWindow {
                         }
                     }
 
-                    // 4. Batterie
                     Text {
                         property bool isCharging: batStatus.includes("Charging")
-                                                  || batStatus.includes("Full")
+                                                || batStatus.includes("Full")
 
-                        text: (isCharging ? "⚡" : "BAT: ") + batPercent + "%"
+                        text: (isCharging ? "⚡ " : " ") + batPercent + "%"
                         color: isCharging
-                               ? root.colGreen
-                               : (batPercent < 20 ? "#f7768e" : root.colGreen)
+                            ? root.colGreen
+                            : (batPercent < 20 ? "#f7768e" : root.colGreen)
 
                         font {
                             family: root.fontFamily
