@@ -15,15 +15,41 @@ PanelWindow {
     property color colCyan: "#0db9d7"
     property color colBlue: "#7aa2f7"
     property color colYellow: "#e0af68"
-    property color colEmpty: "#565f89" // Farbe für inaktive, aber belegte WS
-
+    property color colPurple: "#bb9af7"
+    property color colGreen: "#9ece6a"
+    property color colOrange: "#ff9e64"
+    
     property string fontFamily: "JetBrainsMono Nerd Font"
     property int fontSize: 13
 
-    /* ────────────── CPU LOGIC ────────────── */
+    /* ────────────── STATUS DATA ────────────── */
     property int cpuUsage: 0
+    property int ramUsage: 0
+    property int batPercent: 0
+    property string batStatus: ""
+    property int brightPercent: 0
+
+    // CPU Cache
     property var lastCpuIdle: 0
     property var lastCpuTotal: 0
+
+    // TIMER
+    Timer {
+        interval: 2000 
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: {
+            cpuProc.running = true
+            ramProc.running = true
+            batProc.running = true
+            brightProc.running = true
+        }
+    }
+
+    /* ────────────── PROCESSES ────────────── */
+    
+    // 1. CPU
     Process {
         id: cpuProc
         command: ["sh", "-c", "head -1 /proc/stat"]
@@ -37,18 +63,66 @@ PanelWindow {
                 lastCpuTotal = total; lastCpuIdle = idle
             }
         }
-        Component.onCompleted: running = true
     }
-    Timer { interval: 2000; running: true; repeat: true; onTriggered: cpuProc.running = true }
 
-    /* ────────────── HELPER COMPONENT (Für Uhr & CPU) ────────────── */
+    // 2. RAM
+    Process {
+        id: ramProc
+        // Hinweis: Falls "Speicher" nicht gefunden wird, probiere "Mem" (abhängig von Sprache)
+        command: ["sh", "-c", "free -m | awk '/^Speicher|^Mem/ {printf \"%.0f%%\", ($3/$2)*100}'"]
+        stdout: SplitParser {
+            onRead: data => {
+                if (!data) return
+                var percentage = parseInt(data.trim().replace('%', ''))
+                if (!isNaN(percentage)) ramUsage = percentage
+            }
+        }
+    }
+
+    // 3. BATTERIE
+    Process {
+        id: batProc
+        command: ["sh", "-c", "echo $(cat /sys/class/power_supply/BAT*/capacity | head -1) $(cat /sys/class/power_supply/BAT*/status | head -1)"]
+        stdout: SplitParser {
+            onRead: data => {
+                if (!data) return
+                var parts = data.trim().split(" ")
+                if (parts.length >= 2) {
+                    batPercent = parseInt(parts[0])
+                    batStatus = parts[1]
+                }
+            }
+        }
+    }
+
+    // 4. HELLIGKEIT
+    Process {
+        id: brightProc
+        command: ["brightnessctl", "-m"]
+        stdout: SplitParser {
+            onRead: data => {
+                if (!data) return
+                var parts = data.trim().split(",")
+                if (parts.length > 0) {
+                    // Der vorletzte oder letzte Wert bei brightnessctl -m ist %
+                    // Wir suchen einfach nach dem Wert mit %
+                    var p = parts.find(s => s.includes("%"))
+                    if (p) brightPercent = parseInt(p.replace("%", ""))
+                }
+            }
+        }
+    }
+
+    /* ────────────── UI KOMPONENTEN ────────────── */
+    
+    // BarItem (Nur noch für die Mitte/Uhr benutzt)
     component BarItem: Rectangle {
         property alias text: label.text
         property alias textColor: label.color
         height: 26
         radius: 6
         color: root.colMuted
-        width: label.implicitWidth + 24 // Padding links/rechts
+        width: label.implicitWidth + 24
         Text {
             id: label
             anchors.centerIn: parent
@@ -56,65 +130,47 @@ PanelWindow {
         }
     }
 
-    /* ────────────── WINDOW CONFIG ────────────── */
+    /* ────────────── LAYOUT ────────────── */
+
     anchors { top: true; left: true; right: true }
     implicitHeight: 36
     color: "transparent"
 
     GridLayout {
         anchors.fill: parent
-        anchors.leftMargin: 8
-        anchors.rightMargin: 8
+        anchors.margins: 8
         columns: 3
 
-        /* ────────────── LEFT: WORKSPACES (Gruppiert) ────────────── */
+        /* ────────────── LEFT: WORKSPACES ────────────── */
         RowLayout {
             Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
-
-            // Ein großes Rechteck um alle Zahlen
             Rectangle {
                 color: root.colMuted
                 radius: 6
                 height: 26
-                // Breite passt sich dem Inhalt an + 20px (10 links, 10 rechts Padding)
-                width: wsRow.implicitWidth + 20
-
+                width: wsRow.implicitWidth + 24 
+                
                 RowLayout {
                     id: wsRow
                     anchors.centerIn: parent
-                    spacing: 10 // Abstand zwischen den Zahlen
+                    spacing: 12
 
                     Repeater {
-                        model: 9 // Prüfe Workspaces 1 bis 9
-
+                        model: 9
                         Text {
-                            // Finden des Workspace Objekts, falls es existiert (Fenster offen)
                             property var ws: Hyprland.workspaces.values.find(w => w.id === index + 1)
-                            // Ist es der aktuelle?
                             property bool isActive: Hyprland.focusedWorkspace?.id === (index + 1)
-
-                            // HIER IST DIE LOGIK: Nur sichtbar wenn aktiv ODER belegt
-                            visible: isActive || (ws !== undefined)
                             
-                            // Damit das Layout zusammenrückt wenn etwas unsichtbar ist:
+                            visible: isActive || (ws !== undefined)
                             Layout.preferredWidth: visible ? implicitWidth : 0
                             Layout.preferredHeight: visible ? implicitHeight : 0
 
                             text: index + 1
-                            
-                            // Aktive sind Blau, belegte sind Hellgrau
                             color: isActive ? root.colBlue : root.colFg
+                            font { family: root.fontFamily; pixelSize: root.fontSize; bold: true }
 
-                            font {
-                                family: root.fontFamily
-                                pixelSize: root.fontSize
-                                bold: true
-                            }
-
-                            // Klickbar machen
                             MouseArea {
                                 anchors.fill: parent
-                                // Vergrößere Klickbereich etwas, da Text klein ist
                                 anchors.margins: -4 
                                 onClicked: Hyprland.dispatch("workspace " + (index + 1))
                             }
@@ -124,21 +180,63 @@ PanelWindow {
             }
         }
 
-        /* ────────────── CENTER ────────────── */
+        /* ────────────── CENTER: UHR ────────────── */
         RowLayout {
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            Layout.alignment: Qt.AlignCenter | Qt.AlignVCenter
             BarItem {
                 text: Qt.formatTime(new Date(), "HH:mm")
                 textColor: root.colFg
             }
         }
 
-        /* ────────────── RIGHT ────────────── */
+        /* ────────────── RIGHT: SYSTEM STATUS ────────────── */
         RowLayout {
             Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-            BarItem {
-                text: "CPU: " + cpuUsage + "%"
-                textColor: root.colYellow
+            
+            // Ein großes Rechteck für alle Status-Infos
+            Rectangle {
+                color: root.colMuted
+                radius: 6
+                height: 26
+                // Breite passt sich dem Inhalt an + Padding (24px)
+                width: sysRow.implicitWidth + 24
+
+                RowLayout {
+                    id: sysRow
+                    anchors.centerIn: parent
+                    spacing: 16 // Abstand zwischen den Modulen innerhalb der Box
+
+                    // 1. CPU
+                    Text {
+                        text: " " + cpuUsage + "%"
+                        color: root.colYellow
+                        font { family: root.fontFamily; pixelSize: root.fontSize; bold: true }
+                    }
+
+                    // 2. RAM
+                    Text {
+                        text: " " + ramUsage + "%"
+                        color: root.colPurple
+                        font { family: root.fontFamily; pixelSize: root.fontSize; bold: true }
+                    }
+
+                    // 3. Brightness
+                    Text {
+                        text: " " + brightPercent + "%"
+                        color: root.colOrange
+                        font { family: root.fontFamily; pixelSize: root.fontSize; bold: true }
+                    }
+
+                    // 4. Bat
+                    Text {
+                        property bool isCharging: batStatus.includes("Charging") || batStatus.includes("Full")
+                        text: (isCharging ? "⚡" : "BAT: ") + batPercent + "%"
+                        color: isCharging 
+                            ? root.colGreen 
+                            : (batPercent < 20 ? "#f7768e" : root.colGreen)
+                        font { family: root.fontFamily; pixelSize: root.fontSize; bold: true }
+                    }
+                }
             }
         }
     }
