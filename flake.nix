@@ -18,12 +18,6 @@
         curl
         codex
       ];
-
-      shellHook = ''
-        echo "✓ Entwicklungsumgebung geladen"
-        echo "  Docker: $(docker --version)"
-        echo "  Java: $(java -version 2>&1 | head -n 1)"
-      '';
     };
   };
 }
