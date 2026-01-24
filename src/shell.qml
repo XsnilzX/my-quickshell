@@ -73,7 +73,8 @@ PanelWindow {
         "headset": "",
         "speaker": ["", "", ""],
         "bluetooth": "",
-        "muted": ""
+        "muted": "",
+        "mic": ""
     })
 
     /* ────────────── TIMER ────────────── */
@@ -466,7 +467,7 @@ PanelWindow {
                     Text {
                         id: audioInput
 
-                        text: (sourceMuted ? "" : "") + " " + (sourceMuted ? "" : sourceVolume + "%")
+                        text: root.audioIcons.mic + " " + (sourceMuted ? "0%" : sourceVolume + "%")
                         color: sourceMuted ? "#f7768e" : root.colGreen
 
                         font {
