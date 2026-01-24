@@ -16,7 +16,7 @@
       packages = with pkgs; [
         quickshell
         curl
-        codex
+        opencode
       ];
     };
   };
