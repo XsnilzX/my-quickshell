@@ -75,15 +75,6 @@ Item {
         }
 
         Text {
-            text: "|"
-            color: Theme.colMuted
-            font {
-                family: Theme.fontFamily
-                pixelSize: Theme.fontSize
-            }
-        }
-
-        Text {
             id: audioInput
 
             text: audioIcons.mic + " " + (SystemData.sourceMuted ? "0%" : SystemData.sourceVolume + "%")
