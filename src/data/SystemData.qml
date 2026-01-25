@@ -31,6 +31,16 @@ Item {
             cpuProc.running = true
             ramProc.running = true
             batProc.running = true
+        }
+    }
+
+    Timer {
+        interval: 500
+        running: true
+        repeat: true
+        triggeredOnStart: true
+
+        onTriggered: {
             brightProc.running = true
             sinkProc.running = true
             sourceProc.running = true

@@ -42,6 +42,8 @@ Item {
                     return audioIcons.headphone
                 }
 
+                if (SystemData.sinkVolume <= 0)
+                    return audioIcons.muted
                 if (SystemData.sinkVolume < 33)
                     return audioIcons.speaker1
                 if (SystemData.sinkVolume < 66)
@@ -49,8 +51,8 @@ Item {
                 return audioIcons.speaker3
             }
 
-            text: getIcon() + (SystemData.sinkMuted ? "" : SystemData.sinkVolume + "%")
-            color: SystemData.sinkMuted ? Theme.colRed : Theme.colCyan
+            text: getIcon() + (SystemData.sinkMuted || (SystemData.sinkMuted <= 0) ? "" : SystemData.sinkVolume + "%")
+            color: SystemData.sinkMuted || (SystemData.sinkMuted <= 0) ? Theme.colRed : Theme.colCyan
 
             font {
                 family: Theme.fontFamily
