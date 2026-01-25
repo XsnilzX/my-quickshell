@@ -15,7 +15,7 @@ PanelWindow {
 
     implicitHeight: Theme.barHeight
     color: "transparent"
-    exclusiveZone: Theme.barHeight + 8
+    exclusiveZone: Theme.barHeight + 2
 
     Bar {
         anchors.fill: parent
