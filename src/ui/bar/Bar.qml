@@ -36,13 +36,13 @@ Item {
                 RowLayout {
                     id: statusRow
                     anchors.centerIn: parent
-                    spacing: 16
+                    spacing: 8
 
                     SystemStats { }
 
                     AudioWidget { }
 
-                    Separator { }
+                    //Separator { }
                 }
             }
         }

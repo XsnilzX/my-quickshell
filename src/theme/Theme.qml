@@ -12,8 +12,9 @@ QtObject {
     readonly property color colPurple: "#bb9af7"
     readonly property color colGreen: "#9ece6a"
     readonly property color colOrange: "#ff9e64"
+    readonly property color colRed: "#f7768e"
 
-    readonly property string fontFamily: "JetBrainsMono Nerd Font"
+    readonly property string fontFamily: "font-awesome"
     readonly property int fontSize: 13
     readonly property int barHeight: 36
     readonly property int itemHeight: 34

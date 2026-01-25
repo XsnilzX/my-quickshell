@@ -9,10 +9,13 @@ Item {
     readonly property var audioIcons: ({
         "headphone": "",
         "headset": "",
-        "speaker": ["", "", ""],
+        "speaker1": "",
+        "speaker2": "",
+        "speaker3": "",
         "bluetooth": "",
         "muted": "",
-        "mic": ""
+        "mic": "",
+        "micmuted": ""
     })
 
     implicitWidth: audioRow.implicitWidth
@@ -39,16 +42,15 @@ Item {
                     return audioIcons.headphone
                 }
 
-                var icons = audioIcons.speaker
                 if (SystemData.sinkVolume < 33)
-                    return icons[0]
+                    return audioIcons.speaker1
                 if (SystemData.sinkVolume < 66)
-                    return icons[1]
-                return icons[2]
+                    return audioIcons.speaker2
+                return audioIcons.speaker3
             }
 
-            text: getIcon() + " " + SystemData.sinkVolume + "%"
-            color: SystemData.sinkMuted ? Theme.colMuted : Theme.colCyan
+            text: getIcon() + (SystemData.sinkMuted ? "" : SystemData.sinkVolume + "%")
+            color: SystemData.sinkMuted ? Theme.colRed : Theme.colCyan
 
             font {
                 family: Theme.fontFamily
@@ -77,8 +79,16 @@ Item {
         Text {
             id: audioInput
 
-            text: audioIcons.mic + " " + (SystemData.sourceMuted ? "0%" : SystemData.sourceVolume + "%")
-            color: SystemData.sourceMuted ? "#f7768e" : Theme.colGreen
+            function getIcon() {
+                if (SystemData.sourceMuted) {
+                    return audioIcons.micmuted
+                } else {
+                    return audioIcons.mic
+                }
+            }
+
+            text: getIcon() + (SystemData.sourceMuted ? "" : SystemData.sourceVolume + "%")
+            color: SystemData.sourceMuted ? Theme.colRed : Theme.colGreen
 
             font {
                 family: Theme.fontFamily

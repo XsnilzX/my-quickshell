@@ -10,7 +10,7 @@ Item {
 
     RowLayout {
         id: statsRow
-        spacing: 16
+        spacing: 8
 
         Text {
             text: " " + SystemData.cpuUsage + "%"
