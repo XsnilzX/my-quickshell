@@ -22,7 +22,7 @@ Item {
             spacing: 12
 
             Repeater {
-                model: 9
+                model: 10
 
                 Text {
                     readonly property int workspaceId: index + 1
