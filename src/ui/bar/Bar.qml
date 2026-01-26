@@ -2,13 +2,19 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../../theme"
+import "../../data"
 import "../workspaces"
 import "../clock"
 import "../system"
 import "../audio"
+import "../notifications"
 import "../common"
 
 Item {
+    id: root
+
+    property QtObject panelWindow
+
     anchors.fill: parent
 
     RowLayout {
@@ -39,6 +45,10 @@ Item {
                     spacing: 8
 
                     SystemStats { }
+
+                    NotificationIcon {
+                        panelWindow: root.panelWindow
+                    }
 
                     AudioWidget { }
 

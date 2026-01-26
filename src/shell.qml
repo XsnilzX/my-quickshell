@@ -1,8 +1,9 @@
-import Quickshell
 import QtQuick
+import Quickshell
 
 import "theme"
 import "ui/bar"
+import "ui/notifications"
 
 PanelWindow {
     id: root
@@ -19,5 +20,8 @@ PanelWindow {
 
     Bar {
         anchors.fill: parent
+        panelWindow: root
     }
+
+    NotificationToasts { }
 }

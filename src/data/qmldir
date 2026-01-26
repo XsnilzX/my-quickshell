@@ -1,1 +1,2 @@
 singleton SystemData 1.0 SystemData.qml
+singleton NotificationsData 1.0 NotificationsData.qml
