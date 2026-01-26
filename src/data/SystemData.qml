@@ -10,6 +10,8 @@ Item {
     property int batPercent: 0
     property string batStatus: ""
     property int brightPercent: 0
+    property string powerProfile: ""
+    property string powerProfileTarget: ""
 
     property int sinkVolume: 0
     property bool sinkMuted: false
@@ -20,6 +22,22 @@ Item {
 
     property var lastCpuIdle: 0
     property var lastCpuTotal: 0
+
+    function refreshPowerProfile() {
+        powerProfileProc.running = true
+    }
+
+    function setPowerProfile(profile) {
+        if (!profile || profile === powerProfile)
+            return
+
+        powerProfileTarget = profile
+        powerProfileSetProc.running = true
+        powerProfileRefreshTimer.restart()
+        powerProfile = profile
+    }
+
+    Component.onCompleted: powerProfileProc.running = true
 
     Timer {
         interval: 2000
@@ -44,6 +62,16 @@ Item {
             brightProc.running = true
             sinkProc.running = true
             sourceProc.running = true
+        }
+    }
+
+    Timer {
+        id: powerProfileRefreshTimer
+        interval: 500
+        repeat: false
+
+        onTriggered: {
+            powerProfileProc.running = true
         }
     }
 
@@ -113,6 +141,25 @@ Item {
                 }
             }
         }
+    }
+
+    Process {
+        id: powerProfileProc
+        command: ["powerprofilesctl", "get"]
+
+        stdout: SplitParser {
+            onRead: data => {
+                if (!data)
+                    return
+
+                powerProfile = data.trim()
+            }
+        }
+    }
+
+    Process {
+        id: powerProfileSetProc
+        command: ["powerprofilesctl", "set", powerProfileTarget]
     }
 
     Process {

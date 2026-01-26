@@ -57,5 +57,50 @@ Item {
                 bold: true
             }
         }
+
+        Text {
+            id: powerProfileText
+            property string profile: SystemData.powerProfile
+
+            function profileIcon(profile) {
+                switch (profile) {
+                case "balanced":
+                    return ""
+                case "performance":
+                    return ""
+                case "power-saver":
+                    return ""
+                default:
+                    return "?"
+                }
+            }
+
+            function nextProfile(profile) {
+                switch (profile) {
+                case "power-saver":
+                    return "balanced"
+                case "balanced":
+                    return "performance"
+                case "performance":
+                    return "power-saver"
+                default:
+                    return "balanced"
+                }
+            }
+
+            text: profileIcon(profile)
+            color: Theme.colCyan
+
+            font {
+                family: Theme.fontFamily
+                pixelSize: Theme.fontSize
+                bold: true
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: SystemData.setPowerProfile(powerProfileText.nextProfile(powerProfileText.profile))
+            }
+        }
     }
 }
