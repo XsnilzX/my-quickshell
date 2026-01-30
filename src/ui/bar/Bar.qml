@@ -6,15 +6,17 @@ import "../workspaces"
 import "../clock"
 import "../system"
 import "../audio"
+import "../tray"
 import "../common"
 
 Item {
+    id: bar
     anchors.fill: parent
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: 8
-        anchors.rightMargin: 8
+        anchors.leftMargin: Theme.spacing || 8
+        anchors.rightMargin: Theme.spacing || 8
         spacing: 0
 
         WorkspaceSwitcher { }
@@ -41,6 +43,10 @@ Item {
                     SystemStats { }
 
                     AudioWidget { }
+
+                    Tray {
+                        window: bar
+                    }
 
                     //Separator { }
                 }
