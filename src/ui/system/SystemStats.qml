@@ -12,49 +12,106 @@ Item {
         id: statsRow
         spacing: 8
 
-        Text {
-            text: " " + SystemData.cpuUsage + "%"
-            color: Theme.colYellow
-            font {
-                family: Theme.fontFamily
-                pixelSize: Theme.fontSize
-                bold: true
+        RowLayout {
+            spacing: 4
+
+            Text {
+                text: ""
+                color: Theme.colYellow
+                font {
+                    family: Theme.fontIcons
+                    pixelSize: Theme.fontSize
+                    bold: true
+                }
+            }
+
+            Text {
+                text: SystemData.cpuUsage + "%"
+                color: Theme.colYellow
+                font {
+                    family: Theme.fontFamily
+                    pixelSize: Theme.fontSize
+                    bold: true
+                }
             }
         }
 
-        Text {
-            text: " " + SystemData.ramUsage + "%"
-            color: Theme.colPurple
-            font {
-                family: Theme.fontFamily
-                pixelSize: Theme.fontSize
-                bold: true
+        RowLayout {
+            spacing: 4
+
+            Text {
+                text: ""
+                color: Theme.colPurple
+                font {
+                    family: Theme.fontIcons
+                    pixelSize: Theme.fontSize
+                    bold: true
+                }
+            }
+
+            Text {
+                text: SystemData.ramUsage + "%"
+                color: Theme.colPurple
+                font {
+                    family: Theme.fontFamily
+                    pixelSize: Theme.fontSize
+                    bold: true
+                }
             }
         }
 
-        Text {
-            text: " " + SystemData.brightPercent + "%"
-            color: Theme.colOrange
-            font {
-                family: Theme.fontFamily
-                pixelSize: Theme.fontSize
-                bold: true
+        RowLayout {
+            spacing: 4
+
+            Text {
+                text: ""
+                color: Theme.colOrange
+                font {
+                    family: Theme.fontIcons
+                    pixelSize: Theme.fontSize
+                    bold: true
+                }
+            }
+
+            Text {
+                text: SystemData.brightPercent + "%"
+                color: Theme.colOrange
+                font {
+                    family: Theme.fontFamily
+                    pixelSize: Theme.fontSize
+                    bold: true
+                }
             }
         }
 
-        Text {
+        RowLayout {
+            id: batteryRow
+            spacing: 4
+
             property bool isCharging: SystemData.batStatus.includes("Charging")
                 || SystemData.batStatus.includes("Full")
-
-            text: (isCharging ? "⚡ " : " ") + SystemData.batPercent + "%"
-            color: isCharging
+            readonly property color batteryColor: isCharging
                 ? Theme.colGreen
                 : (SystemData.batPercent < 20 ? "#f7768e" : Theme.colGreen)
 
-            font {
-                family: Theme.fontFamily
-                pixelSize: Theme.fontSize
-                bold: true
+            Text {
+                text: batteryRow.isCharging ? "⚡" : ""
+                color: batteryRow.batteryColor
+                font {
+                    family: Theme.fontIcons
+                    pixelSize: Theme.fontSize
+                    bold: true
+                }
+            }
+
+            Text {
+                text: SystemData.batPercent + "%"
+                color: batteryRow.batteryColor
+                font {
+                    family: Theme.fontFamily
+                    pixelSize: Theme.fontSize
+                    bold: true
+                }
             }
         }
 
@@ -92,7 +149,7 @@ Item {
             color: Theme.colCyan
 
             font {
-                family: Theme.fontFamily
+                family: Theme.fontIcons
                 pixelSize: Theme.fontSize
                 bold: true
             }

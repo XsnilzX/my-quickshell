@@ -25,8 +25,14 @@ Item {
         id: audioRow
         spacing: 8
 
-        Text {
+        Item {
             id: audioOutput
+            implicitWidth: outputRow.implicitWidth
+            implicitHeight: outputRow.implicitHeight
+
+            readonly property color outputColor: SystemData.sinkMuted || (SystemData.sinkMuted <= 0)
+                ? Theme.colRed
+                : Theme.colCyan
 
             function getIcon() {
                 if (SystemData.sinkMuted)
@@ -51,13 +57,33 @@ Item {
                 return audioIcons.speaker3
             }
 
-            text: getIcon() + (SystemData.sinkMuted || (SystemData.sinkMuted <= 0) ? "" : SystemData.sinkVolume + "%")
-            color: SystemData.sinkMuted || (SystemData.sinkMuted <= 0) ? Theme.colRed : Theme.colCyan
+            RowLayout {
+                id: outputRow
+                anchors.fill: parent
+                spacing: 4
 
-            font {
-                family: Theme.fontFamily
-                pixelSize: Theme.fontSize
-                bold: true
+                Text {
+                    text: audioOutput.getIcon()
+                    color: audioOutput.outputColor
+
+                    font {
+                        family: Theme.fontIcons
+                        pixelSize: Theme.fontSize
+                        bold: true
+                    }
+                }
+
+                Text {
+                    text: SystemData.sinkMuted || (SystemData.sinkMuted <= 0) ? "" : SystemData.sinkVolume + "%"
+                    color: audioOutput.outputColor
+                    visible: !SystemData.sinkMuted
+
+                    font {
+                        family: Theme.fontFamily
+                        pixelSize: Theme.fontSize
+                        bold: true
+                    }
+                }
             }
 
             MouseArea {
@@ -78,8 +104,12 @@ Item {
             }
         }
 
-        Text {
+        Item {
             id: audioInput
+            implicitWidth: inputRow.implicitWidth
+            implicitHeight: inputRow.implicitHeight
+
+            readonly property color inputColor: SystemData.sourceMuted ? Theme.colRed : Theme.colGreen
 
             function getIcon() {
                 if (SystemData.sourceMuted) {
@@ -89,13 +119,34 @@ Item {
                 }
             }
 
-            text: getIcon() + (SystemData.sourceMuted ? "" : SystemData.sourceVolume + "%")
-            color: SystemData.sourceMuted ? Theme.colRed : Theme.colGreen
+            RowLayout {
+                id: inputRow
+                anchors.fill: parent
+                spacing: 4
 
-            font {
-                family: Theme.fontFamily
-                pixelSize: Theme.fontSize
-                bold: true
+                Text {
+                    text: audioInput.getIcon()
+                    color: audioInput.inputColor
+
+                    font {
+                        family: Theme.fontIcons
+                        pixelSize: Theme.fontSize
+                        bold: true
+                    }
+                }
+
+                
+                Text {
+                    text: SystemData.sourceMuted ? "" : SystemData.sourceVolume + "%"
+                    color: audioInput.inputColor
+                    visible: !SystemData.sourceMuted
+
+                    font {
+                        family: Theme.fontFamily
+                        pixelSize: Theme.fontSize
+                        bold: true
+                    }
+                }
             }
 
             MouseArea {
