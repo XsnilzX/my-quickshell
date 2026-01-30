@@ -50,7 +50,7 @@ Item {
             }
 
             Text {
-                text: SystemData.ramUsage + "%"
+                text: SystemData.ramUsage
                 color: Theme.colPurple
                 font {
                     family: Theme.fontFamily

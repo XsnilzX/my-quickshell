@@ -6,7 +6,7 @@ import Quickshell.Io
 
 Item {
     property int cpuUsage: 0
-    property int ramUsage: 0
+    property string ramUsage: "0.0GB"
     property int batPercent: 0
     property string batStatus: ""
     property int brightPercent: 0
@@ -105,7 +105,7 @@ Item {
         command: [
             "sh",
             "-c",
-            "free -m | awk '/^Speicher|^Mem/ {printf \"%.0f%%\", ($3/$2)*100}'"
+            "free -m | awk '/^Speicher|^Mem/ {printf \"%.1fGB\", $3/1024}'"
         ]
 
         stdout: SplitParser {
@@ -113,9 +113,9 @@ Item {
                 if (!data)
                     return
 
-                var percentage = parseInt(data.trim().replace('%', ''))
-                if (!isNaN(percentage))
-                    ramUsage = percentage
+                var usage = data.trim()
+                if (usage.length > 0)
+                    ramUsage = usage
             }
         }
     }
