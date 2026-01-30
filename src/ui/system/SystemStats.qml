@@ -145,8 +145,21 @@ Item {
                 }
             }
 
+            function colorProfile(profile) {
+                switch(profile) {
+                    case "power-saver":
+                        return Theme.colGreen
+                    case "balanced":
+                        return Theme.colOrange
+                    case "performance":
+                        return Theme.colRed
+                    default:
+                        return Theme.colCyan
+                }
+            }
+
             text: profileIcon(profile)
-            color: Theme.colCyan
+            color: colorProfile(profile)
 
             font {
                 family: Theme.fontIcons
