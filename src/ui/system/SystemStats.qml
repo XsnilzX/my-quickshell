@@ -95,7 +95,7 @@ Item {
                 : (SystemData.batPercent < 20 ? "#f7768e" : Theme.colGreen)
 
             Text {
-                text: batteryRow.isCharging ? "⚡" : ""
+                text: batteryRow.isCharging ? "" : ""
                 color: batteryRow.batteryColor
                 font {
                     family: Theme.fontIcons
