@@ -4,6 +4,7 @@ import QtQuick.Layouts
 import "../../theme"
 import "../workspaces"
 import "../clock"
+import "../weather"
 import "../system"
 import "../audio"
 import "../tray"
@@ -21,14 +22,24 @@ Item {
 
         WorkspaceSwitcher { }
 
-        Clock { }
-
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
+            RowLayout {
+                anchors.centerIn: parent
+                spacing: 8
+
+                Clock { }
+
+                Weather { }
+            }
+        }
+
+        Item {
+            Layout.fillHeight: true
+
             Rectangle {
-                anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 color: Theme.colMuted
                 radius: Theme.itemRadius
