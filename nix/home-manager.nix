@@ -22,6 +22,10 @@
   runtimePackages =
     [
       pkgs.quickshell
+      pkgs.bash
+      pkgs.coreutils
+      pkgs.procps
+      pkgs.gawk
       pkgs.wireplumber
       pkgs.pulseaudio
       pkgs.brightnessctl
