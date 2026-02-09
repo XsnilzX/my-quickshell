@@ -20,11 +20,15 @@ Item {
         anchors.rightMargin: Theme.spacing || 8
         spacing: 0
 
-        WorkspaceSwitcher { }
+        WorkspaceSwitcher {
+            Layout.preferredWidth: implicitWidth
+            Layout.fillHeight: true
+        }
 
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            clip: true
 
             RowLayout {
                 anchors.centerIn: parent
@@ -37,9 +41,11 @@ Item {
         }
 
         Item {
+            Layout.preferredWidth: statusBox.width
             Layout.fillHeight: true
 
             Rectangle {
+                id: statusBox
                 anchors.verticalCenter: parent.verticalCenter
                 color: Theme.colMuted
                 radius: Theme.itemRadius

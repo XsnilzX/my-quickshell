@@ -10,8 +10,9 @@ Item {
     id: weatherRoot
 
     readonly property bool hasTooltip: GoatherData.tooltip.length > 0
+    readonly property int maxWeatherWidth: 260
 
-    Layout.preferredWidth: weatherItem.implicitWidth
+    Layout.preferredWidth: weatherItem.width
     Layout.fillHeight: true
 
     BarItem {
@@ -19,6 +20,7 @@ Item {
         anchors.centerIn: parent
         text: GoatherData.display
         textColor: Theme.colFg
+        maxWidth: weatherRoot.maxWeatherWidth
     }
 
     HoverHandler {
