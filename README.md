@@ -14,7 +14,7 @@ Add this repo as an input in your main flake and import the exported module.
 
 ```nix
 {
-  inputs.my-quickshell.url = "github:<user>/my-quickshell";
+  inputs.my-quickshell.url = "github:XsnilzX/my-quickshell";
 
   outputs = { home-manager, my-quickshell, ... }: {
     homeConfigurations.<user> = home-manager.lib.homeManagerConfiguration {
