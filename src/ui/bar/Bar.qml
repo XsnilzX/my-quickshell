@@ -14,59 +14,88 @@ Item {
     id: bar
     anchors.fill: parent
 
-    RowLayout {
-        anchors.fill: parent
-        anchors.leftMargin: Theme.spacing || 8
-        anchors.rightMargin: Theme.spacing || 8
-        spacing: 0
+    readonly property int barMargin: Theme.spacing || 8
+    readonly property int blockGap: 8
 
-        WorkspaceSwitcher {
-            Layout.preferredWidth: implicitWidth
-            Layout.fillHeight: true
-        }
+    readonly property int leftBlockRightEdge: leftBlock.x + leftBlock.width
+    readonly property int rightBlockLeftEdge: rightBlock.x
+    readonly property int centerAvailableWidth: Math.max(
+        0,
+        rightBlockLeftEdge - leftBlockRightEdge - (blockGap * 2)
+    )
+    readonly property int weatherAvailableWidth: Math.max(
+        0,
+        centerAvailableWidth - centerClock.implicitWidth - centerRow.spacing
+    )
 
-        Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            clip: true
+    WorkspaceSwitcher {
+        id: leftBlock
+        anchors.left: parent.left
+        anchors.leftMargin: bar.barMargin
+        anchors.verticalCenter: parent.verticalCenter
+    }
+
+    Item {
+        id: rightBlock
+        anchors.right: parent.right
+        anchors.rightMargin: bar.barMargin
+        anchors.verticalCenter: parent.verticalCenter
+        width: statusBox.width
+        height: statusBox.height
+
+        Rectangle {
+            id: statusBox
+            anchors.verticalCenter: parent.verticalCenter
+            color: Theme.colMuted
+            radius: Theme.itemRadius
+            height: Theme.itemHeight
+            width: statusRow.implicitWidth + 24
 
             RowLayout {
+                id: statusRow
                 anchors.centerIn: parent
                 spacing: 8
 
-                Clock { }
+                SystemStats { }
 
-                Weather { }
+                AudioWidget { }
+
+                Tray {
+                    window: bar
+                }
+
+                //Separator { }
             }
         }
+    }
 
-        Item {
-            Layout.preferredWidth: statusBox.width
-            Layout.fillHeight: true
+    Item {
+        id: centerBlock
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        width: Math.max(
+            centerClock.implicitWidth,
+            Math.min(centerRow.implicitWidth, bar.centerAvailableWidth)
+        )
+        height: Theme.itemHeight
 
-            Rectangle {
-                id: statusBox
-                anchors.verticalCenter: parent.verticalCenter
-                color: Theme.colMuted
-                radius: Theme.itemRadius
-                height: Theme.itemHeight
-                width: statusRow.implicitWidth + 24
+        RowLayout {
+            id: centerRow
+            anchors.centerIn: parent
+            spacing: 0
 
-                RowLayout {
-                    id: statusRow
-                    anchors.centerIn: parent
-                    spacing: 8
+            Clock {
+                id: centerClock
+            }
 
-                    SystemStats { }
+            Item {
+                Layout.preferredWidth: 22
+                Layout.preferredHeight: 1
+            }
 
-                    AudioWidget { }
-
-                    Tray {
-                        window: bar
-                    }
-
-                    //Separator { }
-                }
+            Weather {
+                maxItemWidth: bar.weatherAvailableWidth
+                visible: maxItemWidth > 0
             }
         }
     }
