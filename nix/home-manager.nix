@@ -89,10 +89,33 @@ in {
   config = lib.mkIf cfg.enable {
     home.packages = runtimePackages;
 
+    systemd.user.services.import-session-env = {
+      Unit = {
+        Description = "Import session environment into systemd user manager";
+        PartOf = ["graphical-session.target"];
+        After = ["graphical-session.target"];
+      };
+
+      Service = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.dbus}/bin/dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_SESSION_TYPE XDG_CURRENT_DESKTOP DBUS_SESSION_BUS_ADDRESS";
+        ExecStartPost = "${pkgs.systemd}/bin/systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_SESSION_TYPE XDG_CURRENT_DESKTOP DBUS_SESSION_BUS_ADDRESS";
+        RemainAfterExit = true;
+      };
+
+      Install = {
+        WantedBy = ["graphical-session.target"];
+      };
+    };
+
     systemd.user.services.my-quickshell = {
       Unit = {
         Description = "my Quickshell";
-        After = ["graphical-session.target"];
+        After = [
+          "graphical-session.target"
+          "import-session-env.service"
+        ];
+        Wants = ["import-session-env.service"];
         PartOf = ["graphical-session.target"];
       };
 
@@ -105,6 +128,7 @@ in {
           "MYQS_START_NM_APPLET=${if cfg.startNmApplet then "1" else "0"}"
           "MYQS_START_BLUEMAN_APPLET=${if cfg.startBluemanApplet then "1" else "0"}"
           "MYQS_WORKSPACE_BACKEND=${cfg.workspaceBackend}"
+          "QT_QPA_PLATFORM=wayland"
         ];
       };
 
