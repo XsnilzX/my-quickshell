@@ -30,9 +30,9 @@ Item {
             implicitWidth: outputRow.implicitWidth
             implicitHeight: outputRow.implicitHeight
 
-            readonly property color outputColor: SystemData.sinkMuted || (SystemData.sinkMuted <= 0)
+            readonly property color outputColor: SystemData.sinkMuted || (SystemData.sinkVolume <= 0)
                 ? Theme.colRed
-                : Theme.colCyan
+                : Theme.colGreen
 
             function getIcon() {
                 if (SystemData.sinkMuted)
@@ -74,9 +74,9 @@ Item {
                 }
 
                 Text {
-                    text: SystemData.sinkMuted || (SystemData.sinkMuted <= 0) ? "" : SystemData.sinkVolume + "%"
+                    text: SystemData.sinkMuted || (SystemData.sinkVolume <= 0) ? "" : SystemData.sinkVolume + "%"
                     color: audioOutput.outputColor
-                    visible: !SystemData.sinkMuted
+                    visible: !SystemData.sinkMuted && SystemData.sinkVolume > 0
 
                     font {
                         family: Theme.fontFamily
@@ -109,10 +109,12 @@ Item {
             implicitWidth: inputRow.implicitWidth
             implicitHeight: inputRow.implicitHeight
 
-            readonly property color inputColor: SystemData.sourceMuted ? Theme.colRed : Theme.colGreen
+            readonly property color inputColor: SystemData.sourceMuted || (SystemData.sourceVolume <= 0)
+                ? Theme.colRed
+                : Theme.colGreen
 
             function getIcon() {
-                if (SystemData.sourceMuted) {
+                if (SystemData.sourceMuted || (SystemData.sourceVolume <= 0)) {
                     return audioIcons.micmuted
                 } else {
                     return audioIcons.mic
@@ -137,9 +139,9 @@ Item {
 
                 
                 Text {
-                    text: SystemData.sourceMuted ? "" : SystemData.sourceVolume + "%"
+                    text: SystemData.sourceMuted || (SystemData.sourceVolume <= 0) ? "" : SystemData.sourceVolume + "%"
                     color: audioInput.inputColor
-                    visible: !SystemData.sourceMuted
+                    visible: !SystemData.sourceMuted && SystemData.sourceVolume > 0
 
                     font {
                         family: Theme.fontFamily
