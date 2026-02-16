@@ -12,6 +12,8 @@ import "../common"
 
 Item {
     id: bar
+    required property var window
+
     anchors.fill: parent
 
     readonly property int barMargin: Theme.spacing || 8
@@ -61,7 +63,7 @@ Item {
                 AudioWidget { }
 
                 Tray {
-                    window: bar
+                    window: bar.window
                 }
 
                 //Separator { }

@@ -19,5 +19,6 @@ PanelWindow {
 
     Bar {
         anchors.fill: parent
+        window: root
     }
 }

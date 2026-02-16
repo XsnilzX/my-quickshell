@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import Quickshell
 import Quickshell.Services.SystemTray
 
 import "../../theme"
@@ -35,6 +36,8 @@ Item {
                     return title && desc ? `${title}\n${desc}` : (title || desc)
                 }
 
+                readonly property bool hasMenuHandle: trayItem.hasMenu && !!trayItem.menu
+
                 Layout.preferredWidth: iconSize
                 Layout.preferredHeight: iconSize
                 Layout.alignment: Qt.AlignVCenter
@@ -54,37 +57,72 @@ Item {
                     id: hover
                 }
 
+                QsMenuAnchor {
+                    id: menuAnchor
+                    menu: trayItem.menu
+
+                    anchor {
+                        item: trayItemWrapper
+                        edges: Edges.Bottom | Edges.Left
+                        gravity: Edges.Bottom | Edges.Right
+                    }
+                }
+
                 ToolTip.visible: hover.hovered && tooltipText.length > 0
                 ToolTip.text: tooltipText
 
-                TapHandler {
-                    acceptedButtons: Qt.LeftButton
-                    onTapped: {
-                        if (trayItem.onlyMenu && trayItem.hasMenu) {
-                            trayItem.display(root.window, point.position.x, point.position.y)
-                        } else {
-                            trayItem.activate()
+                MouseArea {
+                    anchors.fill: parent
+                    anchors.margins: -4
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+
+                    function menuPosition(mouse) {
+                        if (!root.window || !root.window.contentItem)
+                            return Qt.point(Math.round(mouse.x), Math.round(mouse.y))
+
+                        const pos = trayItemWrapper.mapToItem(root.window.contentItem, mouse.x, mouse.y)
+                        return Qt.point(Math.round(pos.x), Math.round(pos.y))
+                    }
+
+                    function showMenu(mouse) {
+                        if (!trayItem.hasMenu && !trayItem.onlyMenu)
+                            return
+
+                        if (trayItemWrapper.hasMenuHandle) {
+                            if (mouse && mouse.button === Qt.LeftButton && menuAnchor.visible) {
+                                menuAnchor.close()
+                            } else {
+                                menuAnchor.open()
+                            }
+                            return
+                        }
+
+                        if (!root.window)
+                            return
+
+                        const pos = menuPosition(mouse)
+                        trayItem.display(root.window, pos.x, pos.y)
+                    }
+
+                    onPressed: mouse => {
+                        if (mouse.button === Qt.LeftButton) {
+                            if (trayItem.hasMenu || trayItem.onlyMenu) {
+                                showMenu(mouse)
+                            } else if (trayItem.activate) {
+                                trayItem.activate()
+                            }
+                        } else if (mouse.button === Qt.RightButton) {
+                            showMenu(mouse)
+                        } else if (mouse.button === Qt.MiddleButton && trayItem.secondaryActivate) {
+                            trayItem.secondaryActivate()
                         }
                     }
-                }
-
-                TapHandler {
-                    acceptedButtons: Qt.RightButton
-                    onTapped: {
-                        if (trayItem.hasMenu) {
-                            trayItem.display(root.window, point.position.x, point.position.y)
-                        }
-                    }
-                }
-
-                TapHandler {
-                    acceptedButtons: Qt.MiddleButton
-                    onTapped: trayItem.secondaryActivate()
                 }
 
                 WheelHandler {
                     onWheel: event => {
-                        trayItem.scroll(event.angleDelta.y, false)
+                        if (trayItem.scroll)
+                            trayItem.scroll(event.angleDelta.y, false)
                     }
                 }
             }
