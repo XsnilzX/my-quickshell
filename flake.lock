@@ -26,11 +26,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1771061671,
-        "narHash": "sha256-vFP2dTPa2h0zRcGsCcV4ssTW/sEDxNeAEzybj8k6Vkc=",
+        "lastModified": 1771248389,
+        "narHash": "sha256-JRYCE+dTAfYt0NEJCEcCqpge16lHd7jIu7dO4rwfneE=",
         "owner": "XsnilzX",
         "repo": "goather",
-        "rev": "305b1cc85bf62443027201a2f8a347c7687b2534",
+        "rev": "0ef6201ded36b7c06175c7a46166b3151822873a",
         "type": "github"
       },
       "original": {
