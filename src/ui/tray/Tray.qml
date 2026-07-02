@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import Quickshell
 import Quickshell.Services.SystemTray
 
 import "../../theme"
@@ -8,7 +9,9 @@ import "../../data"
 
 Item {
     id: root
-    required property var window
+    required property var panelWindow
+
+    readonly property string trayMenuMode: Quickshell.env("MYQS_TRAY_MENU_MODE") || "hybrid"
     
     implicitWidth: trayRow.implicitWidth
     implicitHeight: trayRow.implicitHeight
@@ -39,6 +42,25 @@ Item {
                 Layout.preferredHeight: iconSize
                 Layout.alignment: Qt.AlignVCenter
 
+                function menuAnchorPoint() {
+                    var point = trayItemWrapper.mapToItem(root, 0, trayItemWrapper.height)
+                    return Qt.point(
+                        Math.round(point.x + (trayItemWrapper.width / 2)),
+                        Math.round(point.y)
+                    )
+                }
+
+                function openMenu() {
+                    if (!trayItem.hasMenu)
+                        return
+
+                    var anchorPoint = menuAnchorPoint()
+                    trayMenuAnchor.anchorX = anchorPoint.x
+                    trayMenuAnchor.anchorY = anchorPoint.y
+
+                    trayMenuAnchor.open()
+                }
+
                 Image {
                     id: trayIcon
                     anchors.fill: parent
@@ -61,7 +83,7 @@ Item {
                     acceptedButtons: Qt.LeftButton
                     onTapped: {
                         if (trayItem.onlyMenu && trayItem.hasMenu) {
-                            trayItem.display(root.window, point.position.x, point.position.y)
+                            trayItemWrapper.openMenu()
                         } else {
                             trayItem.activate()
                         }
@@ -71,9 +93,7 @@ Item {
                 TapHandler {
                     acceptedButtons: Qt.RightButton
                     onTapped: {
-                        if (trayItem.hasMenu) {
-                            trayItem.display(root.window, point.position.x, point.position.y)
-                        }
+                        trayItemWrapper.openMenu()
                     }
                 }
 
@@ -86,6 +106,13 @@ Item {
                     onWheel: event => {
                         trayItem.scroll(event.angleDelta.y, false)
                     }
+                }
+
+                TrayMenuAnchor {
+                    id: trayMenuAnchor
+                    panelWindow: root.panelWindow
+                    trayItem: trayItemWrapper.trayItem
+                    usePreparedAnchor: root.trayMenuMode === "custom"
                 }
             }
         }

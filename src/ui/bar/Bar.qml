@@ -7,11 +7,13 @@ import "../clock"
 import "../weather"
 import "../system"
 import "../audio"
+import "../status"
 import "../tray"
 import "../common"
 
 Item {
     id: bar
+    required property var panelWindow
     anchors.fill: parent
 
     readonly property int barMargin: Theme.spacing || 8
@@ -60,8 +62,12 @@ Item {
 
                 AudioWidget { }
 
+                NotificationStatus { }
+
+                QuickSettingsStatus { }
+
                 Tray {
-                    window: bar
+                    panelWindow: bar.panelWindow
                 }
 
                 //Separator { }

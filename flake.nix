@@ -4,7 +4,11 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     goather = {
-      url = "github:XsnilzX/goather";
+      url = "git+https://codeberg.org/xsnilzx/goather.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    ruather = {
+      url = "git+https://codeberg.org/xsnilzx/ruather.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -13,6 +17,7 @@
     self,
     nixpkgs,
     goather,
+    ruather,
   }: let
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
@@ -20,6 +25,7 @@
       if goather.packages.${system} ? default
       then goather.packages.${system}.default
       else goather.defaultPackage.${system};
+    ruatherPackage = ruather.packages.${system}.default;
   in {
     packages.${system}.default = pkgs.stdenvNoCC.mkDerivation {
       pname = "my-quickshell";
@@ -45,9 +51,10 @@
       packages = with pkgs; [
         quickshell
         curl
-        opencode
+        codex
       ] ++ [
         goatherPackage
+        ruatherPackage
       ];
     };
   };

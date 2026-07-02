@@ -1,3 +1,5 @@
 singleton SystemData 1.0 SystemData.qml
 singleton TrayProcesses TrayProcesses.qml
 singleton GoatherData GoatherData.qml
+singleton NotificationsData NotificationsData.qml
+singleton ShellUiState ShellUiState.qml

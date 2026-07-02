@@ -6,6 +6,8 @@ QtObject {
     readonly property color colBg: "#1a1b26"
     readonly property color colFg: "#a9b1d6"
     readonly property color colMuted: "#24283b"
+    readonly property color colOverlay: "#1f2335"
+    readonly property color colOverlayAlt: "#292e42"
     readonly property color colCyan: "#0db9d7"
     readonly property color colBlue: "#7aa2f7"
     readonly property color colYellow: "#e0af68"
@@ -17,7 +19,12 @@ QtObject {
     readonly property string fontFamily: "JetBrains Mono"
     readonly property string fontIcons: "Font Awesome 7 Free"
     readonly property int fontSize: 13
+    readonly property int spacing: 8
     readonly property int barHeight: 36
     readonly property int itemHeight: 34
     readonly property int itemRadius: 6
+    readonly property int popupRadius: 10
+    readonly property int popupWidth: 360
+    readonly property int popupPadding: 14
+    readonly property int osdWidth: 260
 }

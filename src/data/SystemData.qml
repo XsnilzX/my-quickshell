@@ -27,6 +27,24 @@ Item {
         powerProfileProc.running = true
     }
 
+    function setSinkVolumeDelta(delta) {
+        sinkVolumeDelta = delta
+        sinkVolumeProc.running = true
+    }
+
+    function toggleSinkMute() {
+        sinkMuteProc.running = true
+    }
+
+    function toggleSourceMute() {
+        sourceMuteProc.running = true
+    }
+
+    function setBrightnessDelta(delta) {
+        brightnessDelta = delta
+        brightSetProc.running = true
+    }
+
     function setPowerProfile(profile) {
         if (!profile || profile === powerProfile)
             return
@@ -38,6 +56,9 @@ Item {
     }
 
     Component.onCompleted: powerProfileProc.running = true
+
+    property int sinkVolumeDelta: 5
+    property int brightnessDelta: 5
 
     Timer {
         interval: 2000
@@ -227,5 +248,34 @@ Item {
                 sourceMuted = data.includes("[MUTED]")
             }
         }
+    }
+
+    Process {
+        id: sinkVolumeProc
+        command: [
+            "wpctl",
+            "set-volume",
+            "@DEFAULT_AUDIO_SINK@",
+            sinkVolumeDelta >= 0 ? Math.abs(sinkVolumeDelta) + "%+" : Math.abs(sinkVolumeDelta) + "%-"
+        ]
+    }
+
+    Process {
+        id: sinkMuteProc
+        command: ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"]
+    }
+
+    Process {
+        id: sourceMuteProc
+        command: ["wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle"]
+    }
+
+    Process {
+        id: brightSetProc
+        command: [
+            "brightnessctl",
+            "set",
+            brightnessDelta >= 0 ? "+" + Math.abs(brightnessDelta) + "%" : Math.abs(brightnessDelta) + "%-"
+        ]
     }
 }

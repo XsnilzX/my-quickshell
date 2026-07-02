@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
-import Quickshell.Io
+
+import Quickshell
 
 import "../../theme"
 import "../../data"
@@ -90,16 +91,10 @@ Item {
                 anchors.fill: parent
                 anchors.margins: -4
 
-                onClicked: {
-                    pavuProc.running = true
-                }
+                onClicked: Quickshell.execDetached(["pavucontrol"])
 
                 onWheel: wheel => {
-                    if (wheel.angleDelta.y > 0) {
-                        volUpProc.running = true
-                    } else {
-                        volDownProc.running = true
-                    }
+                    SystemData.setSinkVolumeDelta(wheel.angleDelta.y > 0 ? 5 : -5)
                 }
             }
         }
@@ -155,30 +150,8 @@ Item {
                 anchors.fill: parent
                 anchors.margins: -4
 
-                onClicked: {
-                    micToggleProc.running = true
-                }
+                onClicked: SystemData.toggleSourceMute()
             }
         }
-    }
-
-    Process {
-        id: pavuProc
-        command: ["pavucontrol"]
-    }
-
-    Process {
-        id: volUpProc
-        command: ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "5%+"]
-    }
-
-    Process {
-        id: volDownProc
-        command: ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "5%-"]
-    }
-
-    Process {
-        id: micToggleProc
-        command: ["wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "toggle"]
     }
 }

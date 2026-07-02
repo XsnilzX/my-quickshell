@@ -77,6 +77,36 @@ in {
       description = "Enable goather in the Quickshell runtime PATH.";
     };
 
+    enableNotifications = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Enable the Quickshell notification daemon and notification UI.";
+    };
+
+    enableQuickSettings = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Enable the Quickshell quick settings popup.";
+    };
+
+    enableOsd = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Enable Quickshell OSD popups for volume, brightness and power profile changes.";
+    };
+
+    notificationHistoryLimit = lib.mkOption {
+      type = lib.types.int;
+      default = 100;
+      description = "Maximum number of notifications to keep in session history.";
+    };
+
+    trayMenuMode = lib.mkOption {
+      type = lib.types.enum ["native" "hybrid" "custom"];
+      default = "hybrid";
+      description = "Tray menu display mode used by the tray widget.";
+    };
+
     goatherPackage = lib.mkOption {
       type = lib.types.package;
       default = defaultGoatherPackage;
@@ -132,6 +162,11 @@ in {
           "MYQS_START_NM_APPLET=${if cfg.startNmApplet then "1" else "0"}"
           "MYQS_START_BLUEMAN_APPLET=${if cfg.startBluemanApplet then "1" else "0"}"
           "MYQS_WORKSPACE_BACKEND=${cfg.workspaceBackend}"
+          "MYQS_ENABLE_NOTIFICATIONS=${if cfg.enableNotifications then "1" else "0"}"
+          "MYQS_ENABLE_QUICK_SETTINGS=${if cfg.enableQuickSettings then "1" else "0"}"
+          "MYQS_ENABLE_OSD=${if cfg.enableOsd then "1" else "0"}"
+          "MYQS_NOTIFICATION_HISTORY_LIMIT=${toString cfg.notificationHistoryLimit}"
+          "MYQS_TRAY_MENU_MODE=${cfg.trayMenuMode}"
           "QT_QPA_PLATFORM=wayland"
         ];
       };
